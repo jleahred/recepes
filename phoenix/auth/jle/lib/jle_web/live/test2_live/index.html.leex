@@ -1,0 +1,35 @@
+<h1>Listing Test</h1>
+
+<%= if @live_action in [:new, :edit] do %>
+  <%= live_modal @socket, JleWeb.Test2Live.FormComponent,
+    id: @test2.id || :new,
+    title: @page_title,
+    action: @live_action,
+    test2: @test2,
+    return_to: Routes.test2_index_path(@socket, :index) %>
+<% end %>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="test">
+    <%= for test2 <- @test do %>
+      <tr id="test2-<%= test2.id %>">
+        <td><%= test2.name %></td>
+
+        <td>
+          <span><%= live_redirect "Show", to: Routes.test2_show_path(@socket, :show, test2) %></span>
+          <span><%= live_patch "Edit", to: Routes.test2_index_path(@socket, :edit, test2) %></span>
+          <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: test2.id, data: [confirm: "Are you sure?"] %></span>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<span><%= live_patch "New Test2", to: Routes.test2_index_path(@socket, :new) %></span>

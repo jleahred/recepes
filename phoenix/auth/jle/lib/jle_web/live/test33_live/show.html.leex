@@ -1,0 +1,22 @@
+<h1>Show Test33</h1>
+
+<%= if @live_action in [:edit] do %>
+  <%= live_modal @socket, JleWeb.Test33Live.FormComponent,
+    id: @test33.id,
+    title: @page_title,
+    action: @live_action,
+    test33: @test33,
+    return_to: Routes.test33_show_path(@socket, :show, @test33) %>
+<% end %>
+
+<ul>
+
+  <li>
+    <strong>Description:</strong>
+    <%= @test33.description %>
+  </li>
+
+</ul>
+
+<span><%= live_patch "Edit", to: Routes.test33_show_path(@socket, :edit, @test33), class: "button" %></span>
+<span><%= live_redirect "Back", to: Routes.test33_index_path(@socket, :index) %></span>

@@ -1,0 +1,13 @@
+<h1>Show Test44</h1>
+
+<ul>
+
+  <li>
+    <strong>Description:</strong>
+    <%= @test44.description %>
+  </li>
+
+</ul>
+
+<span><%= link "Edit", to: Routes.test44_path(@conn, :edit, @test44) %></span>
+<span><%= link "Back", to: Routes.test44_path(@conn, :index) %></span>
