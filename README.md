@@ -1,2 +1,3 @@
-# recepes
-set of recepes for... several things
+# recipes
+
+set of recipes for... several things
