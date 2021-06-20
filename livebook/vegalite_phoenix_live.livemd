@@ -1,0 +1,137 @@
+# Using vegalite on phoenix liveview
+
+## Description
+
+`vegalite` is an insteresting graph library
+
+It's also the library used on `livebook`
+
+How to move a graph generated on `livebook` to a `phoenix/liveview` application?
+
+## Simple graph in liveview
+
+First the imports...
+
+```elixir
+Mix.install([
+  {:vega_lite, "~> 0.1.0"},
+  {:jason, "~> 1.2"},
+  {:kino, "~> 0.1.0"}
+])
+
+alias VegaLite, as: Vl
+```
+
+Now a simple graph
+
+```elixir
+data = [
+  %{"date" => "2021-06-28", score: 20},
+  %{"date" => "2021-06-20", score: 10},
+  %{"date" => "2020-06-28", score: 5}
+]
+
+vl =
+  Vl.new(width: 700, height: 300)
+  |> Vl.data_from_values(data)
+  |> Vl.transform(filter: "datum.date > '2021'")
+  # |> Vl.transform(filter: "datum.symbol == 'GOOG'")
+  # |> Vl.mark(:area)
+  # |> Vl.mark(:bar)
+  |> Vl.mark(:line, point: true)
+  # |> Vl.mark(:point)
+  |> Vl.encode_field(:x, "date", type: :nominal)
+  # |> Vl.encode_field(:x, "date", type: :ordinal)
+  # |> Vl.encode_field(:x, "date", type_unit: :month, type: :temporal)
+  |> Vl.encode_field(:x, "date", type: :temporal, type_unit: :year)
+  |> Vl.encode_field(:y, "score", type: :quantitative)
+
+# vl.spec |> Jason.encode!()
+# vl.spec |> Jason.encode!()
+# vl |> Vl.to_spec() |> Jason.encode!()
+# IO.puts(vl |> Vl.to_spec() |> Jason.encode!())
+
+vl
+```
+
+OK, we have the graph on `livebook`
+
+How can we move it to `phoenix/liveview` template?
+
+We are going to need the `spec` info from `vl`
+
+```elixir
+IO.puts(vl.spec |> Jason.encode!())
+```
+
+This is what we need on our template!
+
+## Phoenix liveview
+
+Minimum code for liveview...
+
+Filename `simplegraph_live.ex`
+
+<!-- livebook:{"force_markdown":true} -->
+
+```elixir
+defmodule VegaliteWeb.TestLive do
+  use VegaliteWeb, :live_view
+  alias VegaLite, as: Vl
+
+  @impl true
+  def mount(_params, _session, socket) do
+    {:ok, socket, query: "", nothing: "")}
+  end
+
+  # create the spec for vegalite graph
+  def vl_graph() do
+    data = [
+      %{"date" => "2021-06-28", score: 20},
+      %{"date" => "2021-06-20", score: 10},
+      %{"date" => "2020-06-28", score: 5}
+    ]
+
+    vl =
+      Vl.new(width: 700, height: 300)
+      |> Vl.data_from_values(data)
+      |> Vl.transform(filter: "datum.date > '2021'")
+      # |> Vl.transform(filter: "datum.symbol == 'GOOG'")
+      # |> Vl.mark(:area)
+      # |> Vl.mark(:bar)
+      |> Vl.mark(:line, point: true)
+      # |> Vl.mark(:point)
+      |> Vl.encode_field(:x, "date", type: :nominal)
+      # |> Vl.encode_field(:x, "date", type: :ordinal)
+      # |> Vl.encode_field(:x, "date", type_unit: :month, type: :temporal)
+      |> Vl.encode_field(:x, "date", type: :temporal, type_unit: :year)
+      |> Vl.encode_field(:y, "score", type: :quantitative)
+
+    # vl.spec |> Jason.encode!()
+    vl |> Vl.to_spec() |> Jason.encode!()
+  end
+
+end
+```
+
+And the template...
+Filaname `simplegraph_live.html.leex`
+
+```html
+  <head>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.20.2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.1.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.17.0"></script>
+  </head>
+
+    <div id="vis" phx-update="ignore"></div>
+
+    <script type="text/javascript">
+      vegaEmbed('#vis', <%= raw(vl_graph()) %>);
+    </script>
+
+```
+
+And that's all
+
+Take a look to `phx-update="ignore"`
