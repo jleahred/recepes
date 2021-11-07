@@ -1,12 +1,137 @@
-# Elixir/Phoenix with auth and deploy
+# Elixir/Phoenix with auth and sqlite and bootstrap and deploy
 
 
-[phx_gen_auth](https://github.com/aaronrenner/phx_gen_auth)
+## Create application with sqlite
+
+Updated to phoenix 1.6, it simplyfies a lot  nice!
+
+
+[phoenix_auth](https://hexdocs.pm/phoenix/Mix.Tasks.Phx.Gen.Auth.html)
 
 
 Create a phx application
 
-    mix phx.new jle --live
+    mix phx.new jle --database sqlite3
+
+No needed --live anymore, and new option to sqlite3  :-)
+
+Done!
+
+Follow instructions...
+
+```
+We are almost there! The following steps are missing:
+
+    $ cd jle
+
+Then configure your database in config/dev.exs and run:
+
+    $ mix ecto.create
+
+Start your Phoenix app with:
+
+    $ mix phx.server
+
+You can also run your app inside IEx (Interactive Elixir) as:
+
+    $ iex -S mix phx.server
+
+```
+
+
+## Add authentication
+
+Easy now...
+
+```
+    mix phx.gen.auth Accounts User users
+```
+
+And follow instructions again
+
+```
+Please re-fetch your dependencies with the following command:
+
+    $ mix deps.get
+
+Remember to update your repository by running migrations:
+
+    $ mix ecto.migrate
+
+Once you are ready, visit "/users/register"
+to create your account and then access to "/dev/mailbox" to
+see the account confirmation email.
+```
+
+Add
+
+```
+    mix ecto.migrate
+```
+
+## Add bulma
+
+In root.html.heex
+
+```
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+```
+
+
+## Add bootstrap
+
+[bootstrap phoenix](https://fullstackphoenix.com/tutorials/bootstrap-5-and-phoenix-liveview)
+
+```elixir
+# mix.exs
+defp deps do
+  [
+    ...
+    {:dart_sass, "~> 0.2", runtime: Mix.env() == :dev}
+  ]
+end
+  
+defp aliases do
+  [
+    ...
+    "assets.deploy": [
+      "esbuild default --minify",
+      "sass default --no-source-map --style=compressed",
+      "phx.digest"
+    ]
+  ]
+end
+```
+
+
+```elixir
+# config/config.exs
+config :dart_sass,
+  version: "1.42.1",
+  default: [
+    args: ~w(css/app.scss ../priv/static/assets/app.css),
+    cd: Path.expand("../assets", __DIR__)
+  ]
+```
+
+Inside the watchers list in the Endpoint configuration, add the following
+
+```elixir
+# config/dev.exs
+    sass: {
+      DartSass,
+      :install_and_run,
+      [:default, ~w(--embed-source-map --source-map-urls=absolute --watch)]
+    }
+```
+
+```
+mix sass.install
+```
+
+## Old version...
+
+
 
 Follow instrucionts...
 
